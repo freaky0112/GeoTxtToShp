@@ -146,6 +146,7 @@ namespace GeoTxtToShp {
                 oFeature.SetGeometry(geomTriangle);
                 oLayer.CreateFeature(oFeature);
             }
+            oDS.Dispose();
             MessageBox.Show("生成完毕");
         }
 
