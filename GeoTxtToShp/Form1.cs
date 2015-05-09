@@ -130,9 +130,19 @@ namespace GeoTxtToShp {
             oPCMC.SetWidth(100);
             oLayer.CreateField(oPCMC, 1);
             //地块号
-            FieldDefn oDKH = new FieldDefn("GKH", FieldType.OFTString);
+            FieldDefn oDKH = new FieldDefn("DKH", FieldType.OFTString);
             oDKH.SetWidth(100);
             oLayer.CreateField(oDKH, 1);
+
+            //日期
+            FieldDefn oDate = new FieldDefn("Date", FieldType.OFTString);
+            oDate.SetWidth(10);
+            oLayer.CreateField(oDate, 1);
+
+            //用地类型
+            FieldDefn oType = new FieldDefn("Type", FieldType.OFTString);
+            oType.SetWidth(10);
+            oLayer.CreateField(oType, 1);
 
             FeatureDefn oDefn = oLayer.GetLayerDefn();
             int index = 0;
@@ -142,6 +152,8 @@ namespace GeoTxtToShp {
                 oFeature.SetField(0, index);
                 oFeature.SetField(1, data.PCMC);
                 oFeature.SetField(2, data.Dkh);
+                oFeature.SetField(3, data.Date);
+                oFeature.SetField(4, data.Type);
                 Geometry geomTriangle = Geometry.CreateFromWkt(GetGeometry(data));
                 oFeature.SetGeometry(geomTriangle);
                 oLayer.CreateFeature(oFeature);
@@ -169,6 +181,51 @@ namespace GeoTxtToShp {
             geometry.Remove(geometry.Length - 1,1);
             geometry.Append("))");
             return geometry.ToString();
+        }
+        /// <summary>
+        /// 利用4列坐标
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnImprtColumnFour_Click(object sender, EventArgs e) {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.InitialDirectory = "c://";
+            openFileDialog.Multiselect = true;
+            openFileDialog.Filter = "txt文件|*.txt|所有文件|*.*";
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.FilterIndex = 1;
+            if (openFileDialog.ShowDialog() == DialogResult.OK) {
+                string[] importTxt = openFileDialog.FileNames;
+                foreach (string file in importTxt) {
+                    DataReadColumnFour(file, GetFileName(file));
+                }
+                MessageBox.Show("共计" + DataList.Count.ToString() + "个地块");
+            }
+        }
+
+        private void DataReadColumnFour(string file, string fileName) {
+            StreamReader sr = new StreamReader(file, Encoding.GetEncoding("gb2312"));
+            Data data = new Data();
+            string txt = sr.ReadLine();
+            while (txt != null) {
+                if (txt.Split(',').Length == 9) {
+                    if (!string.IsNullOrEmpty(data.PCMC)) {
+                        DataList.Add(data);
+                    }
+                    data = new Data();
+                    data.Dkh = txt.Split(',')[3];
+                    data.PCMC = fileName;
+                    data.Date = txt.Split(',')[2];
+                    data.Type = txt.Split(',')[6];
+                } else if (txt.Split(',').Length == 4) {
+                    Point point = new Point();
+                    point.X = double.Parse(txt.Split(',')[3]);
+                    point.Y = double.Parse(txt.Split(',')[2]);
+                    data.PointList.Add(point);
+                }
+                txt = sr.ReadLine();
+            }
+            DataList.Add(data);
         }
 
 

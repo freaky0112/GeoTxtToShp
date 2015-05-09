@@ -47,6 +47,28 @@ namespace GeoTxtToShp {
             }
         }
 
+        string _date;
+
+        public string Date {
+            get {
+                return _date;
+            }
+            set {
+                _date = value;
+            }
+        }
+
+        string _type;
+
+        public string Type {
+            get {
+                return _type;
+            }
+            set {
+                _type = value;
+            }
+        }
+
     }
 
     public class Point {
