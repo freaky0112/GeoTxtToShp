@@ -40,18 +40,18 @@ namespace GeoTxtToShp {
             int i = file.Split('\\').Length;
             fileName = file.Split('\\')[i - 1];
             fileName = fileName.Split('.')[0];
-            return fileName;   
+            return RemoveNumber(fileName);   
         }
 
-        private void DataRead(string file,string fileName) {
+        private void DataRead(string file, string fileName) {
             StreamReader sr = new StreamReader(file, Encoding.GetEncoding("gb2312"));
             Data data = new Data();
             string txt = sr.ReadLine();
-            while (txt != null) {
-                
+            while (txt!=null) {
+
                 if (IsNumber(txt.Split(',')[0])) {
                     Point point = new Point();
-                    point.X=double.Parse(txt.Split(',')[5]);
+                    point.X = double.Parse(txt.Split(',')[5]);
                     point.Y = double.Parse(txt.Split(',')[4]);
                     data.PointList.Add(point);
                 } else {
@@ -60,11 +60,13 @@ namespace GeoTxtToShp {
                     }
                     data = new Data();
                     data.Dkh = txt;
-                    data.PCMC = fileName;
                 }
+                data.PCMC = fileName;
                 txt = sr.ReadLine();
             }
-            DataList.Add(data);
+            if (data.PointList.Count > 0) {
+                DataList.Add(data);
+            }
         }
 
 
@@ -81,6 +83,25 @@ namespace GeoTxtToShp {
 
             System.Text.RegularExpressions.Regex r = new System.Text.RegularExpressions.Regex(strValue);
             return r.IsMatch(strNumber);
+        }
+
+        /// <summary>
+        /// 去掉字符串中的数字
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public  string RemoveNumber(string key) {
+            return System.Text.RegularExpressions.Regex.Replace(key, @"\d", "");
+        }
+        public static List<string> GetCSVs(string path) {
+            List<string> list = new List<string>();
+            DirectoryInfo TheFolder = new DirectoryInfo(path);
+            foreach (FileInfo file in TheFolder.GetFiles()) {
+                if (file.Extension == ".csv" || file.Extension == ".CSV") {
+                    list.Add(file.FullName);
+                }
+            }
+            return list;
         }
 
         private void btnGenerate_Click(object sender, EventArgs e) {
